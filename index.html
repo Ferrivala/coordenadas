@@ -1,14 +1,32 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mi Aplicación Web</title>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>Mi Aplicación Web</title>
 </head>
 <body>
-    <button id="guardarCoordenadas">Guardar Coordenadas</button>
-    <p id="frase"></p>
+   <button id="guardarCoordenadas">Guardar Coordenadas</button>
+   <p id="frase"></p>
 
-    <script src="app.js"></script>
+   <script>
+      document.getElementById('guardarCoordenadas').addEventListener('click', function() {
+         // Lógica para obtener las coordenadas GPS
+         navigator.geolocation.getCurrentPosition(function(position) {
+            var latitud = position.coords.latitude;
+            var longitud = position.coords.longitude;
+
+            // Lógica para mostrar las coordenadas en un cuadro de diálogo
+            var mensaje = "Coordenadas GPS: \nLatitud: " + latitud + "\nLongitud: " + longitud;
+            window.prompt("Coordenadas GPS", mensaje);
+         });
+
+         // Lógica para obtener la frase
+         var frase = "¡Hola, mundo!";
+
+         // Muestra la frase en la etiqueta
+         document.getElementById('frase').innerHTML = frase;
+      });
+   </script>
 </body>
 </html>
