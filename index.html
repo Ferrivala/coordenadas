@@ -3,23 +3,44 @@
 <head>
    <meta charset="UTF-8">
    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-   <title>Mi Aplicación Web</title>
+   <title>Guardar Coordenadas</title>
+   <style>
+      body {
+         display: flex;
+         align-items: center;
+         justify-content: center;
+         height: 100vh;
+         margin: 0;
+      }
+
+      button {
+         padding: 10px;
+         font-size: 16px;
+         cursor: pointer;
+      }
+
+      #coordinates {
+         margin-top: 20px;
+         font-size: 18px;
+      }
+   </style>
 </head>
 <body>
-   <button id="guardarCoordenadas">Guardar Coordenadas</button>
-   <p id="frase"></p>
+   <button id="saveCoordinates">Guardar Coordenadas</button>
+   <p id="coordinates"></p>
 
    <script>
-      document.getElementById('guardarCoordenadas').addEventListener('click', function() {
-         // Lógica para obtener las coordenadas GPS
+      document.getElementById('saveCoordinates').addEventListener('click', function() {
          navigator.geolocation.getCurrentPosition(function(position) {
             var latitud = position.coords.latitude;
             var longitud = position.coords.longitude;
 
-            // Lógica para mostrar las coordenadas en un cuadro de diálogo
-            window.prompt(latitud + "," + longitud);
-         });
+            // Muestra las coordenadas en el párrafo
+            var coordinatesText = "Latitud: " + latitud + ", Longitud: " + longitud;
+            document.getElementById('coordinates').innerText = coordinatesText;
 
+            // Aquí puedes agregar lógica adicional, como enviar las coordenadas a un servidor, etc.
+         });
       });
    </script>
 </body>
