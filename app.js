@@ -10,15 +10,9 @@ document.getElementById('guardarCoordenadas').addEventListener('click', function
         });
     
         // Lógica para obtener la frase
-        var frase = "¡Hola, mundo!";
-    
-        // Muestra la frase en la etiqueta
-        document.getElementById('frase').innerHTML = frase;
+        var mensaje = "Coordenadas GPS: \nLatitud: " + latitud + "\nLongitud: " + longitud;
+            window.prompt("Coordenadas GPS", mensaje);
+        
     });
-    
-    // Lógica para obtener la frase
-    var frase = "¡Hola, mundo!";
 
-    // Muestra la frase en la etiqueta
-    document.getElementById('frase').innerHTML = frase;
 });
