@@ -50,6 +50,14 @@
    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
    <script>
       var historialCoordenadas = [];
+      var ubicacionActual;
+
+      navigator.geolocation.getCurrentPosition(function(position) {
+         ubicacionActual = {
+            latitud: position.coords.latitude,
+            longitud: position.coords.longitude
+         };
+      });
 
       document.getElementById('generarCoordenadas').addEventListener('click', function() {
          generarCoordenadasAleatorias();
@@ -60,14 +68,18 @@
       });
 
       function generarCoordenadasAleatorias() {
-         var ubicacionCentral = { latitud: 40.416775, longitud: -3.703790 }; // Coordenadas de Madrid, España
+         if (!ubicacionActual) {
+            alert('La ubicación actual no está disponible. Asegúrate de permitir el acceso a la ubicación.');
+            return;
+         }
+
          historialCoordenadas = [];
 
          for (var i = 0; i < 20; i++) {
             var distancia = Math.random() * 50 / 111.32; // 1 grado de latitud ~ 111.32 km
             var angulo = Math.random() * 2 * Math.PI;
-            var nuevaLatitud = ubicacionCentral.latitud + distancia * Math.sin(angulo);
-            var nuevaLongitud = ubicacionCentral.longitud + distancia * Math.cos(angulo);
+            var nuevaLatitud = ubicacionActual.latitud + distancia * Math.sin(angulo);
+            var nuevaLongitud = ubicacionActual.longitud + distancia * Math.cos(angulo);
 
             historialCoordenadas.push({
                latitud: nuevaLatitud,
@@ -87,7 +99,7 @@
       }
 
       function actualizarMapa() {
-         var mapa = L.map('map').setView([historialCoordenadas[0].latitud, historialCoordenadas[0].longitud], 10);
+         var mapa = L.map('map').setView([ubicacionActual.latitud, ubicacionActual.longitud], 10);
          L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(mapa);
 
          historialCoordenadas.forEach(function(coordenada) {
@@ -98,4 +110,5 @@
    </script>
 </body>
 </html>
+
 
