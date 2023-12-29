@@ -3,45 +3,66 @@
 <head>
    <meta charset="UTF-8">
    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-   <title>Guardar Coordenadas</title>
+   <title>Historial de Coordenadas</title>
    <style>
       body {
          display: flex;
          align-items: center;
          justify-content: center;
+         flex-direction: column;
          height: 100vh;
          margin: 0;
       }
 
       button {
+         margin-top: 10px;
          padding: 10px;
          font-size: 16px;
          cursor: pointer;
       }
 
-      #coordinates {
+      input {
+         margin-top: 10px;
+         padding: 8px;
+         font-size: 14px;
+      }
+
+      #historial {
          margin-top: 20px;
-         font-size: 18px;
+         font-size: 16px;
       }
    </style>
 </head>
 <body>
-   <button id="saveCoordinates">Guardar Coordenadas</button>
-   <p id="coordinates"></p>
+   <button id="guardarCoordenadas">Guardar Coordenadas</button>
+   <input type="text" id="texto" placeholder="Texto a guardar">
+   <div id="historial"></div>
 
    <script>
-      document.getElementById('saveCoordinates').addEventListener('click', function() {
+      document.getElementById('guardarCoordenadas').addEventListener('click', function() {
          navigator.geolocation.getCurrentPosition(function(position) {
             var latitud = position.coords.latitude;
             var longitud = position.coords.longitude;
+            var texto = document.getElementById('texto').value;
+            var fechaHora = obtenerFechaHoraActual();
 
-            // Muestra las coordenadas en el párrafo
-            var coordinatesText = "Latitud: " + latitud + ", Longitud: " + longitud;
-            document.getElementById('coordinates').innerText = coordinatesText;
+            // Construir la fila para el historial
+            var filaHistorial = "<strong>Fecha/Hora:</strong> " + fechaHora +
+                                ", <strong>Coordenadas:</strong> " + latitud + ", " + longitud +
+                                ", <strong>Texto:</strong> " + texto + "<br>";
 
-            // Aquí puedes agregar lógica adicional, como enviar las coordenadas a un servidor, etc.
+            // Agregar la fila al historial
+            document.getElementById('historial').innerHTML += filaHistorial;
+
+            // Puedes agregar lógica adicional, como guardar los datos en un array o enviarlos a un servidor.
          });
       });
+
+      function obtenerFechaHoraActual() {
+         var fechaHora = new Date();
+         var opcionesFechaHora = { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: false };
+         return fechaHora.toLocaleDateString('es-ES', opcionesFechaHora);
+      }
    </script>
 </body>
 </html>
