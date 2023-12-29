@@ -3,7 +3,7 @@
 <head>
    <meta charset="UTF-8">
    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-   <title>Historial de Coordenadas Aleatorias</title>
+   <title>Historial de Coordenadas</title>
    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
    <style>
       body {
@@ -42,7 +42,7 @@
 </head>
 <body>
    <div class="container">
-      <button id="generarCoordenadas">Generar Coordenadas Aleatorias</button>
+      <button id="guardarCoordenadas">Guardar Coordenadas</button>
       <div id="historial"></div>
       <div id="map"></div>
    </div>
@@ -50,65 +50,38 @@
    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
    <script>
       var historialCoordenadas = [];
-      var ubicacionActual;
 
-      navigator.geolocation.getCurrentPosition(function(position) {
-         ubicacionActual = {
-            latitud: position.coords.latitude,
-            longitud: position.coords.longitude
-         };
-      });
-
-      document.getElementById('generarCoordenadas').addEventListener('click', function() {
-         generarCoordenadasAleatorias();
-         // Visualizar en el historial
-         actualizarHistorial();
-         // Visualizar en el mapa
-         actualizarMapa();
-      });
-
-      function generarCoordenadasAleatorias() {
-         if (!ubicacionActual) {
-            alert('La ubicación actual no está disponible. Asegúrate de permitir el acceso a la ubicación.');
-            return;
-         }
-
-         historialCoordenadas = [];
-
-         for (var i = 0; i < 20; i++) {
-            var distancia = Math.random() * 50 / 111.32; // 1 grado de latitud ~ 111.32 km
-            var angulo = Math.random() * 2 * Math.PI;
-            var nuevaLatitud = ubicacionActual.latitud + distancia * Math.sin(angulo);
-            var nuevaLongitud = ubicacionActual.longitud + distancia * Math.cos(angulo);
+      document.getElementById('guardarCoordenadas').addEventListener('click', function() {
+         navigator.geolocation.getCurrentPosition(function(position) {
+            var latitud = position.coords.latitude;
+            var longitud = position.coords.longitude;
+            var texto = prompt("Ingrese un texto para este lugar:");
+            var fechaHora = obtenerFechaHoraActual();
 
             historialCoordenadas.push({
-               latitud: nuevaLatitud,
-               longitud: nuevaLongitud,
-               texto: `Coordenada ${i + 1}`
+               fechaHora: fechaHora,
+               latitud: latitud,
+               longitud: longitud,
+               texto: texto
             });
-         }
+
+            // Visualizar en el historial
+            actualizarHistorial();
+            // Visualizar en el mapa
+            actualizarMapa();
+         });
+      });
+
+      function obtenerFechaHoraActual() {
+         var fechaHora = new Date();
+         var opcionesFechaHora = { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: false };
+         return fechaHora.toLocaleDateString('es-ES', opcionesFechaHora);
       }
 
       function actualizarHistorial() {
          var historialHTML = "";
          historialCoordenadas.forEach(function(coordenada) {
-            historialHTML += `<strong>Coordenadas:</strong> ${coordenada.latitud.toFixed(6)}, ${coordenada.longitud.toFixed(6)}, <strong>Texto:</strong> ${coordenada.texto}<br>`;
-         });
+            historialHTML += `<strong>Fecha/Hora:</strong> ${coordenada.fecha
 
-         document.getElementById('historial').innerHTML = historialHTML;
-      }
-
-      function actualizarMapa() {
-         var mapa = L.map('map').setView([ubicacionActual.latitud, ubicacionActual.longitud], 10);
-         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(mapa);
-
-         historialCoordenadas.forEach(function(coordenada) {
-            L.marker([coordenada.latitud, coordenada.longitud]).addTo(mapa)
-               .bindPopup(`Coordenadas: ${coordenada.latitud.toFixed(6)}, ${coordenada.longitud.toFixed(6)}<br>Texto: ${coordenada.texto}`);
-         });
-      }
-   </script>
-</body>
-</html>
 
 
