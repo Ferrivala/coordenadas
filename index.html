@@ -4,6 +4,7 @@
    <meta charset="UTF-8">
    <meta name="viewport" content="width=device-width, initial-scale=1.0">
    <title>Historial de Coordenadas</title>
+   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
    <style>
       body {
          display: flex;
@@ -37,6 +38,12 @@
          font-size: 16px;
          max-width: 300px; /* Limita el ancho del historial */
       }
+
+      #map {
+         margin-top: 20px;
+         height: 300px; /* Ajusta la altura del mapa según sea necesario */
+         width: 100%;
+      }
    </style>
 </head>
 <body>
@@ -44,9 +51,13 @@
       <button id="guardarCoordenadas">Guardar Coordenadas</button>
       <input type="text" id="texto" placeholder="Texto a guardar">
       <div id="historial"></div>
+      <div id="map"></div>
    </div>
 
+   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
    <script>
+      var historialCoordenadas = [];
+
       document.getElementById('guardarCoordenadas').addEventListener('click', function() {
          navigator.geolocation.getCurrentPosition(function(position) {
             var latitud = position.coords.latitude;
@@ -55,12 +66,20 @@
             var fechaHora = obtenerFechaHoraActual();
 
             // Construir la fila para el historial
-            var filaHistorial = fechaHora + "," + latitud + "," + longitud + ',"' + texto + '"\n';
+            var filaHistorial = {
+               fechaHora: fechaHora,
+               latitud: latitud,
+               longitud: longitud,
+               texto: texto
+            };
 
-            // Agregar la fila al historial
-            document.getElementById('historial').innerHTML += filaHistorial;
+            historialCoordenadas.push(filaHistorial);
 
-            // Puedes agregar lógica adicional, como guardar los datos en un array o enviarlos a un servidor.
+            // Visualizar en el historial
+            actualizarHistorial();
+
+            // Visualizar en el mapa
+            actualizarMapa();
          });
       });
 
@@ -70,18 +89,24 @@
          return fechaHora.toLocaleDateString('es-ES', opcionesFechaHora);
       }
 
-      function descargarCSV() {
-         var historialCSV = "Fecha/Hora,Latitud,Longitud,Texto\n" + document.getElementById('historial').innerText;
-         var blob = new Blob([historialCSV], { type: 'text/csv' });
+      function actualizarHistorial() {
+         var historialHTML = "";
+         historialCoordenadas.forEach(function(coordenada) {
+            historialHTML += `<strong>Fecha/Hora:</strong> ${coordenada.fechaHora}, <strong>Coordenadas:</strong> ${coordenada.latitud}, ${coordenada.longitud}, <strong>Texto:</strong> ${coordenada.texto}<br>`;
+         });
 
-         var a = document.createElement('a');
-         a.href = URL.createObjectURL(blob);
-         a.download = 'historial_coordenadas.csv';
-         document.body.appendChild(a);
-         a.click();
-         document.body.removeChild(a);
+         document.getElementById('historial').innerHTML = historialHTML;
+      }
+
+      function actualizarMapa() {
+         var mapa = L.map('map').setView([historialCoordenadas[historialCoordenadas.length - 1].latitud, historialCoordenadas[historialCoordenadas.length - 1].longitud], 15);
+         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(mapa);
+
+         historialCoordenadas.forEach(function(coordenada) {
+            L.marker([coordenada.latitud, coordenada.longitud]).addTo(mapa)
+               .bindPopup(`Fecha/Hora: ${coordenada.fechaHora}<br>Texto: ${coordenada.texto}`);
+         });
       }
    </script>
-   <button onclick="descargarCSV()">Descargar CSV</button>
 </body>
 </html>
