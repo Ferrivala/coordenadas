@@ -9,9 +9,14 @@
          display: flex;
          align-items: center;
          justify-content: center;
-         flex-direction: column;
          height: 100vh;
          margin: 0;
+      }
+
+      .container {
+         display: flex;
+         flex-direction: column;
+         align-items: center;
       }
 
       button {
@@ -30,13 +35,16 @@
       #historial {
          margin-top: 20px;
          font-size: 16px;
+         max-width: 300px; /* Limita el ancho del historial */
       }
    </style>
 </head>
 <body>
-   <button id="guardarCoordenadas">Guardar Coordenadas</button>
-   <input type="text" id="texto" placeholder="Texto a guardar">
-   <div id="historial"></div>
+   <div class="container">
+      <button id="guardarCoordenadas">Guardar Coordenadas</button>
+      <input type="text" id="texto" placeholder="Texto a guardar">
+      <div id="historial"></div>
+   </div>
 
    <script>
       document.getElementById('guardarCoordenadas').addEventListener('click', function() {
@@ -47,9 +55,7 @@
             var fechaHora = obtenerFechaHoraActual();
 
             // Construir la fila para el historial
-            var filaHistorial = "<strong>Fecha/Hora:</strong> " + fechaHora +
-                                ", <strong>Coordenadas:</strong> " + latitud + ", " + longitud +
-                                ", <strong>Texto:</strong> " + texto + "<br>";
+            var filaHistorial = fechaHora + "," + latitud + "," + longitud + ',"' + texto + '"\n';
 
             // Agregar la fila al historial
             document.getElementById('historial').innerHTML += filaHistorial;
@@ -63,6 +69,19 @@
          var opcionesFechaHora = { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: false };
          return fechaHora.toLocaleDateString('es-ES', opcionesFechaHora);
       }
+
+      function descargarCSV() {
+         var historialCSV = "Fecha/Hora,Latitud,Longitud,Texto\n" + document.getElementById('historial').innerText;
+         var blob = new Blob([historialCSV], { type: 'text/csv' });
+
+         var a = document.createElement('a');
+         a.href = URL.createObjectURL(blob);
+         a.download = 'historial_coordenadas.csv';
+         document.body.appendChild(a);
+         a.click();
+         document.body.removeChild(a);
+      }
    </script>
+   <button onclick="descargarCSV()">Descargar CSV</button>
 </body>
 </html>
