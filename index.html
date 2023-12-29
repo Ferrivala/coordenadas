@@ -3,7 +3,7 @@
 <head>
    <meta charset="UTF-8">
    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-   <title>Historial de Coordenadas</title>
+   <title>Historial de Coordenadas con Foto</title>
    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
    <style>
       body {
@@ -38,13 +38,20 @@
          height: 300px; /* Ajusta la altura del mapa según sea necesario */
          width: 100%;
       }
+
+      #fotoContainer {
+         display: none;
+      }
    </style>
 </head>
 <body>
    <div class="container">
-      <button id="guardarCoordenadas">Guardar Coordenadas</button>
+      <button id="guardarCoordenadas">Guardar Coordenadas con Foto</button>
       <div id="historial"></div>
       <div id="map"></div>
+      <div id="fotoContainer">
+         <img id="foto" alt="Foto asociada a las coordenadas" width="300" height="200">
+      </div>
    </div>
 
    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
@@ -58,17 +65,21 @@
             var texto = prompt("Ingrese un texto para este lugar:");
             var fechaHora = obtenerFechaHoraActual();
 
-            historialCoordenadas.push({
-               fechaHora: fechaHora,
-               latitud: latitud,
-               longitud: longitud,
-               texto: texto
-            });
+            // Tomar una foto
+            tomarFoto(function(foto) {
+               historialCoordenadas.push({
+                  fechaHora: fechaHora,
+                  latitud: latitud,
+                  longitud: longitud,
+                  texto: texto,
+                  foto: foto
+               });
 
-            // Visualizar en el historial
-            actualizarHistorial();
-            // Visualizar en el mapa
-            actualizarMapa();
+               // Visualizar en el historial
+               actualizarHistorial();
+               // Visualizar en el mapa
+               actualizarMapa();
+            });
          });
       });
 
@@ -83,7 +94,8 @@
          historialCoordenadas.forEach(function(coordenada) {
             historialHTML += `<strong>Fecha/Hora:</strong> ${coordenada.fechaHora}<br>`;
             historialHTML += `<strong>Coordenadas:</strong> ${coordenada.latitud.toFixed(6)}, ${coordenada.longitud.toFixed(6)}<br>`;
-            historialHTML += `<strong>Texto:</strong> ${coordenada.texto}<br><br>`;
+            historialHTML += `<strong>Texto:</strong> ${coordenada.texto}<br>`;
+            historialHTML += `<img src="${coordenada.foto}" alt="Foto asociada a las coordenadas" width="100"><br><br>`;
          });
 
          document.getElementById('historial').innerHTML = historialHTML;
@@ -95,9 +107,44 @@
 
          historialCoordenadas.forEach(function(coordenada) {
             L.marker([coordenada.latitud, coordenada.longitud]).addTo(mapa)
-               .bindPopup(`Fecha/Hora: ${coordenada.fechaHora}<br>Texto: ${coordenada.texto}`);
+               .bindPopup(`Fecha/Hora: ${coordenada.fechaHora}<br>Texto: ${coordenada.texto}<br><img src="${coordenada.foto}" alt="Foto asociada a las coordenadas" width="100">`);
          });
+      }
+
+      function tomarFoto(callback) {
+         var fotoContainer = document.getElementById('fotoContainer');
+         var foto = document.getElementById('foto');
+         var video = document.createElement('video');
+         var canvas = document.createElement('canvas');
+         var context = canvas.getContext('2d');
+
+         navigator.mediaDevices.getUserMedia({ video: true })
+            .then(function(stream) {
+               fotoContainer.style.display = 'block';
+               video.srcObject = stream;
+               video.play();
+               video.addEventListener('loadedmetadata', function() {
+                  canvas.width = video.videoWidth;
+                  canvas.height = video.videoHeight;
+                  context.drawImage(video, 0, 0, canvas.width, canvas.height);
+                  var dataURL = canvas.toDataURL('image/png');
+                  foto.src = dataURL;
+
+                  // Detener la transmisión y limpiar los elementos
+                  stream.getTracks().forEach(track => track.stop());
+                  video.srcObject = null;
+
+                  // Llamar al callback con la foto como argumento
+                  callback(dataURL);
+               });
+            })
+            .catch(function(error) {
+               console.error('Error al acceder a la cámara: ', error);
+               // En caso de error, llamar al callback sin foto
+               callback(null);
+            });
       }
    </script>
 </body>
 </html>
+
