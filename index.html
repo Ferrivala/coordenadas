@@ -81,7 +81,23 @@
       function actualizarHistorial() {
          var historialHTML = "";
          historialCoordenadas.forEach(function(coordenada) {
-            historialHTML += `<strong>Fecha/Hora:</strong> ${coordenada.fecha
+            historialHTML += `<strong>Fecha/Hora:</strong> ${coordenada.fechaHora}<br>`;
+            historialHTML += `<strong>Coordenadas:</strong> ${coordenada.latitud.toFixed(6)}, ${coordenada.longitud.toFixed(6)}<br>`;
+            historialHTML += `<strong>Texto:</strong> ${coordenada.texto}<br><br>`;
+         });
 
+         document.getElementById('historial').innerHTML = historialHTML;
+      }
 
+      function actualizarMapa() {
+         var mapa = L.map('map').setView([historialCoordenadas[historialCoordenadas.length - 1].latitud, historialCoordenadas[historialCoordenadas.length - 1].longitud], 15);
+         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(mapa);
 
+         historialCoordenadas.forEach(function(coordenada) {
+            L.marker([coordenada.latitud, coordenada.longitud]).addTo(mapa)
+               .bindPopup(`Fecha/Hora: ${coordenada.fechaHora}<br>Texto: ${coordenada.texto}`);
+         });
+      }
+   </script>
+</body>
+</html>
