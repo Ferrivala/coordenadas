@@ -3,7 +3,7 @@
 <head>
    <meta charset="UTF-8">
    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-   <title>Historial de Coordenadas</title>
+   <title>Historial de Coordenadas Aleatorias</title>
    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
    <style>
       body {
@@ -27,12 +27,6 @@
          cursor: pointer;
       }
 
-      input {
-         margin-top: 10px;
-         padding: 8px;
-         font-size: 14px;
-      }
-
       #historial {
          margin-top: 20px;
          font-size: 16px;
@@ -48,8 +42,7 @@
 </head>
 <body>
    <div class="container">
-      <button id="guardarCoordenadas">Guardar Coordenadas</button>
-      <input type="text" id="texto" placeholder="Texto a guardar">
+      <button id="generarCoordenadas">Generar Coordenadas Aleatorias</button>
       <div id="historial"></div>
       <div id="map"></div>
    </div>
@@ -58,55 +51,51 @@
    <script>
       var historialCoordenadas = [];
 
-      document.getElementById('guardarCoordenadas').addEventListener('click', function() {
-         navigator.geolocation.getCurrentPosition(function(position) {
-            var latitud = position.coords.latitude;
-            var longitud = position.coords.longitude;
-            var texto = document.getElementById('texto').value;
-            var fechaHora = obtenerFechaHoraActual();
-
-            // Construir la fila para el historial
-            var filaHistorial = {
-               fechaHora: fechaHora,
-               latitud: latitud,
-               longitud: longitud,
-               texto: texto
-            };
-
-            historialCoordenadas.push(filaHistorial);
-
-            // Visualizar en el historial
-            actualizarHistorial();
-
-            // Visualizar en el mapa
-            actualizarMapa();
-         });
+      document.getElementById('generarCoordenadas').addEventListener('click', function() {
+         generarCoordenadasAleatorias();
+         // Visualizar en el historial
+         actualizarHistorial();
+         // Visualizar en el mapa
+         actualizarMapa();
       });
 
-      function obtenerFechaHoraActual() {
-         var fechaHora = new Date();
-         var opcionesFechaHora = { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: false };
-         return fechaHora.toLocaleDateString('es-ES', opcionesFechaHora);
+      function generarCoordenadasAleatorias() {
+         var ubicacionCentral = { latitud: 40.416775, longitud: -3.703790 }; // Coordenadas de Madrid, España
+         historialCoordenadas = [];
+
+         for (var i = 0; i < 20; i++) {
+            var distancia = Math.random() * 50 / 111.32; // 1 grado de latitud ~ 111.32 km
+            var angulo = Math.random() * 2 * Math.PI;
+            var nuevaLatitud = ubicacionCentral.latitud + distancia * Math.sin(angulo);
+            var nuevaLongitud = ubicacionCentral.longitud + distancia * Math.cos(angulo);
+
+            historialCoordenadas.push({
+               latitud: nuevaLatitud,
+               longitud: nuevaLongitud,
+               texto: `Coordenada ${i + 1}`
+            });
+         }
       }
 
       function actualizarHistorial() {
          var historialHTML = "";
          historialCoordenadas.forEach(function(coordenada) {
-            historialHTML += `<strong>Fecha/Hora:</strong> ${coordenada.fechaHora}, <strong>Coordenadas:</strong> ${coordenada.latitud}, ${coordenada.longitud}, <strong>Texto:</strong> ${coordenada.texto}<br>`;
+            historialHTML += `<strong>Coordenadas:</strong> ${coordenada.latitud.toFixed(6)}, ${coordenada.longitud.toFixed(6)}, <strong>Texto:</strong> ${coordenada.texto}<br>`;
          });
 
          document.getElementById('historial').innerHTML = historialHTML;
       }
 
       function actualizarMapa() {
-         var mapa = L.map('map').setView([historialCoordenadas[historialCoordenadas.length - 1].latitud, historialCoordenadas[historialCoordenadas.length - 1].longitud], 15);
+         var mapa = L.map('map').setView([historialCoordenadas[0].latitud, historialCoordenadas[0].longitud], 10);
          L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(mapa);
 
          historialCoordenadas.forEach(function(coordenada) {
             L.marker([coordenada.latitud, coordenada.longitud]).addTo(mapa)
-               .bindPopup(`Fecha/Hora: ${coordenada.fechaHora}<br>Texto: ${coordenada.texto}`);
+               .bindPopup(`Coordenadas: ${coordenada.latitud.toFixed(6)}, ${coordenada.longitud.toFixed(6)}<br>Texto: ${coordenada.texto}`);
          });
       }
    </script>
 </body>
 </html>
+
